@@ -1,9 +1,5 @@
 # YPL parser 0.27
 
-# written by VB.
-
-import re
-
 class keyword(str): pass
 class code(str): pass
 

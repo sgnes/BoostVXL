@@ -4,4 +4,4 @@
 
 # Edit this path to point at the tools/build/v2 subdirectory of your
 # Boost installation.  Absolute paths work, too.
-boost-build D:/boost_1_39_0/tools/build/v2 ;
+boost-build C:/download/boost_1_62_0/tools/build/src ;
