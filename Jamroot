@@ -13,6 +13,7 @@ use-project boost
 project boost-python-quickstart
   : requirements <library>/boost/python//boost_python 
   : requirements <library>./vxlapi.lib
+  : requirements <library>C:/download/boost_1_62_0/bin.v2/libs/python/build/msvc-14.0/debug/threading-multi/boost_python-vc140-mt-gd-1_62.lib
     ;
 
 # Make the definition of the python-extension rule available
@@ -21,23 +22,4 @@ import python ;
 # Declare a Python extension called hello.
 python-extension VectorCan : VectorCan.cpp ;
 
-# Declare an executable called embedding that embeds Python
-exe embedding : embedding.cpp /python//python ;
 
-import testing ;
-
-# Declare a test of the extension module
-testing.make-test run-pyd : extending test_extending.py : : test_ext ;
-
-# Declare a test of the embedding application
-testing.run embedding 
-  :              # any ordinary arguments
-  : script.py    # any arguments that should be treated as relative paths
-  :              # requirements
-  : test_embed ; # name of test
-
-# Create a "test" target that runs all the tests
-alias test : test_ext test_embed ;
-
-# make sure the tests don't run by default
-explicit test_ext test_embed test ;

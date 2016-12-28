@@ -27,7 +27,8 @@ using namespace boost::python;
             printf("Line: %d\n", __LINE__);\
 			PyErr_SetString(PyExc_RuntimeError, xlGetErrorString(xlStatus));\
 		}\
-	}\
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// CanMsg CLASS FOLOWS ////////////////////////////
@@ -138,74 +139,63 @@ std::string Can:: __str__() {
 	return rep;
 }
 
-void Can::openChannels(boost::python::list pl,  u32 BitRate,  u32 OutputMode) {
-	XLaccess  permissionMask = 0;
-	u32 channel = 0;
-	u32 i=0;
-	int pelem = 0;
-	int nElem = extract<int>(pl.attr("__len__")());
 
-    XLchipParams chipParams = {125000, 4, 10, 7, 3};
-    
-	for (pelem = 0; pelem < nElem; ++pelem){
-		channel = extract<int> ( pl[pelem] );
 
-		for (i=0; i < drvConfig.channelCount; i++) {
-            if (
-                (drvConfig.channel[i].channelBusCapabilities & XL_BUS_COMPATIBLE_CAN) 
-                && 
-				drvConfig.channel[i].channelIndex==channel 
-               ) 	
-            { 
-			   channelsMask |= drvConfig.channel[i].channelMask;
-			}
-		}
-	}
+void Can::openChannels(u32 channel_index_, u32 BitRate, u32 OutputMode)
+{
+    XLaccess permissionMask = 0;
+    u32 channel = 0;
+    u32 i = 0;
+    int pelem = 0;
+	std::ostringstream oss;
+  
+	
+    XLchipParams chipParams = { 125000, 1, 4, 3, 1 };
 
-	CHKERR( 
-                    xlOpenPort( &portHandle, appName, 
-                                channelsMask, &permissionMask, 
-                                256, XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN)
-                );
+    for (i = 0; i < drvConfig.channelCount; i++)
+    {
+        if ((drvConfig.channel[i].channelBusCapabilities & XL_BUS_COMPATIBLE_CAN) && drvConfig.channel[i].channelIndex == channel_index_)
+        {
+            channelsMask |= drvConfig.channel[i].channelMask;
+            oss << "Channel is founded.\n";
+            PySys_WriteStdout(oss.str().c_str());
+        }
+    }
+
+	
+    CHKERR(xlOpenPort( &portHandle, appName, channelsMask, &permissionMask, 256, XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN));
 
     printf("PortHandle %d Invalid: %d\n", portHandle, XL_INVALID_PORTHANDLE);
 
-    
+    if (BitRate != 0)
+    {
+        CHKERR(xlCanSetChannelBitrate(portHandle, permissionMask, BitRate));
 
-	if (BitRate != 0){
-        CHKERR( xlCanSetChannelBitrate(portHandle, permissionMask, BitRate) );
-	}
-	
-    CHKERR( xlCanSetReceiveMode(portHandle, 1, 0) );
-    
-    CHKERR( xlCanSetChannelOutput(portHandle, permissionMask, OutputMode) );
-    
-    CHKERR( xlCanSetChannelParams(portHandle, permissionMask, &chipParams ) );
-    
-    CHKERR( xlCanSetChannelTransceiver(
-                  portHandle,
-                  channelsMask,
-                  XL_TRANSCEIVER_TYPE_PB_CAN_SWC,//XL_TRANSCEIVER_TYPE_CAN_252,
-                  XL_TRANSCEIVER_LINEMODE_SWC_NORMAL, //XL_TRANSCEIVER_LINEMODE_NORMAL ,
-                  XL_TRANSCEIVER_RESNET_MASTER_STBY ) );
-    
-    //
-//	if (OutputMode != XL_OUTPUT_MODE_SILENT) {
-        
-//	}
-    
-	CHKERR( xlActivateChannel( portHandle, channelsMask, 
-                                        XL_BUS_TYPE_CAN, 
-                                        XL_ACTIVATE_RESET_CLOCK) 
-               );
+    }
+
+    CHKERR(xlCanSetReceiveMode(portHandle, 1, 0));
+
+    CHKERR(xlCanSetChannelOutput(portHandle, permissionMask, OutputMode));
+
+
+    //CHKERR(xlCanSetChannelParams(portHandle, permissionMask, &chipParams));
+
+
+    CHKERR(xlCanSetChannelTransceiver( portHandle, channelsMask, XL_TRANSCEIVER_TYPE_PB_CAN_SWC, //XL_TRANSCEIVER_TYPE_CAN_252,
+                    XL_TRANSCEIVER_LINEMODE_SWC_NORMAL,//XL_TRANSCEIVER_LINEMODE_NORMAL ,
+                    XL_TRANSCEIVER_RESNET_MASTER_STBY ));
+
+
+    CHKERR(xlActivateChannel( portHandle, channelsMask, XL_BUS_TYPE_CAN, XL_ACTIVATE_RESET_CLOCK));
+
 }
 
-void Can::openChannels1(boost::python::list pl){
-	Can::openChannels(pl);
+void Can::openChannels1(u32 channel_index){
+	Can::openChannels(channel_index);
 }
 
-void Can::openChannels2(boost::python::list pl,  u32 BitRate){
-	Can::openChannels(pl, BitRate);
+void Can::openChannels2(u32 channel_index,  u32 BitRate){
+	Can::openChannels(channel_index, BitRate);
 }
 
 boost::python::list Can::read(){
@@ -241,8 +231,9 @@ boost::python::list Can::read(){
 	return retList;
 }
 
-void Can::write(boost::python::list inList){
+int Can::write(boost::python::list inList){
 		XLevent       xlEvent;
+		XLstatus      xlstatus;
 		u32 messageCount = 1;
 		u8 celem=0;
 		CanMsg msg;
@@ -264,8 +255,9 @@ void Can::write(boost::python::list inList){
 			}
 
             //printf("%d\n", channelsMask);
-			CHKERR(xlCanTransmit(portHandle, channelsMask, &messageCount, &xlEvent));
+			xlstatus = xlCanTransmit(portHandle, channelsMask, &messageCount, &xlEvent);
 		}
+	return xlstatus;
 }
 
 

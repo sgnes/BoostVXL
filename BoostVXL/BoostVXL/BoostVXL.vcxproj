@@ -68,7 +68,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\download\boost_1_62_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -110,6 +112,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\..\.project" />
+    <None Include="..\..\.pydevproject" />
+    <None Include="..\..\b2.exe" />
+    <None Include="..\..\bjam.exe" />
+    <None Include="..\..\boost-build.jam" />
+    <None Include="..\..\Jamroot" />
+    <None Include="..\..\script.py" />
+    <None Include="..\..\test_extending.py" />
+    <None Include="..\..\VectorCan.cpp.bak" />
+    <None Include="..\..\vxlapi.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\boost_python-vc71-mt-gd-1_39.lib" />
+    <Library Include="..\..\libboost_python-vc140-mt-gd-1_62.lib" />
+    <Library Include="..\..\vxlapi.lib" />
+    <Library Include="..\..\vxlapib.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\embedding.cpp" />
+    <ClCompile Include="..\..\VectorCan.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\VectorCan.h" />
+    <ClInclude Include="..\..\vxlapi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

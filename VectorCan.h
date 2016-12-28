@@ -60,12 +60,12 @@ namespace vcan {
 			~Can();
 
 			std::string __str__();
-			void openChannels(boost::python::list pl, u32 BitRate=0, u32 OutputMode=XL_OUTPUT_MODE_NORMAL);
-			void openChannels1(boost::python::list pl);
-			void openChannels2(boost::python::list pl, u32 BitRate=0);
+			void openChannels(u32 channel_index_, u32 BitRate=0, u32 OutputMode=XL_OUTPUT_MODE_NORMAL);
+			void openChannels1(u32 channel_index_);
+			void openChannels2(u32 channel_index_, u32 BitRate=0);
 
 			boost::python::list read();
-			void write(boost::python::list);
+			int write(boost::python::list);
 	};
 }
 
